@@ -1,0 +1,1736 @@
+---
+title: "Trabalho Final RDI"
+author:
+  - "Alice Moreira Marques-22306521"
+  - "Eduardo Galvão de Aquino Cavalheiro-22303433"
+  - "Eduardo Sousa Hirle de Freitas-22303593"
+  - "Gabriel Almeida Poppi Durante-22302431"
+  - "Isadora Almeida Poppi Durante-22302370"
+  - "João Victor Ferreira Marques-22303180"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    number_sections: true
+    toc: true
+    toc_depth: 2
+fontsize: 12pt
+geometry: a4paper
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(reticulate)
+
+```
+
+```{r python-setup, include=FALSE}
+library(reticulate)
+use_python("~/.virtualenvs/r-reticulate/Scripts/python.exe", required = TRUE)
+# Colocar o seu ambiente pythom na linha acima 
+
+```
+
+```{r install-python-libs, include=FALSE}
+# Lista de bibliotecas Python necessárias
+required_packages <- c("numpy", "pandas", "scikit-learn", "matplotlib", "seaborn", "requests", "beautifulsoup4","tabulate")
+# Verificar e instalar as bibliotecas
+py_install(required_packages, pip = TRUE)
+
+```
+
+------------------------------------------------------------------------
+
+## Seção 1: Web Scraping
+
+------------------------------------------------------------------------
+
+##  Justificativa da Escolha do Mercado Livre
+
+O Mercado Livre foi escolhido como alvo de raspagem de dados devido à sua relevância e popularidade na América Latina, especialmente no Brasil, onde se destaca como uma das maiores plataformas de e-commerce. A plataforma oferece uma grande variedade de produtos e informações, como preços, descrições e links de produtos, o que torna a raspagem de dados uma excelente fonte de informações para análises de mercado, comparações de preços e insights sobre o comportamento dos consumidores. Além disso, a coleta de dados de e-commerce pode ser útil para pesquisas sobre tendências de consumo e estratégias de marketing.
+
+------------------------------------------------------------------------
+
+##  Ferramentas Utilizadas
+
+### Linguagem de Programação
+
+A linguagem de programação escolhida para realizar a raspagem de dados foi o Python, uma das linguagens mais populares no campo da ciência de dados. Python é amplamente utilizado para automação de processos e análise de grandes volumes de dados, com várias bibliotecas dedicadas ao processamento e coleta de informações de sites.
+
+### Bibliotecas Utilizadas
+
+- requests: Utilizada para enviar requisições HTTP e obter o conteúdo das páginas da web.
+- BeautifulSoup (bs4): Responsável pelo parsing do HTML das páginas, permitindo a extração de informações relevantes.
+- time: Usada para introduzir atrasos entre as requisições, evitando sobrecarga nos servidores e prevenindo o bloqueio por parte do site.
+- pandas: Utilizada para organizar e manipular os dados coletados em um formato estruturado (DataFrame), facilitando a análise posterior.
+
+------------------------------------------------------------------------
+
+##  Passo a Passo do Processo de Coleta
+
+A coleta de dados seguiu um processo estruturado, que pode ser descrito nas etapas a seguir:
+
+1.Definição do Produto e URL: O produto alvo da coleta foi o iPhone. Com isso, foi criada a URL de busca para os produtos relacionados a este item no Mercado Livre.
+2. Envio de Requisições HTTP: Utilizou-se a biblioteca `requests` para enviar requisições HTTP para as páginas do Mercado Livre, coletando o conteúdo HTML das páginas de produtos.
+3. Parse do Conteúdo HTML: Usando o BeautifulSoup, o conteúdo HTML retornado foi analisado para identificar e extrair as informações relevantes, como descrições dos produtos, preços e links.
+4. Armazenamento dos Dados: As informações extraídas foram armazenadas em uma lista de dicionários, com cada item contendo o nome do produto, preço e link para o anúncio.
+5. Criação do DataFrame: Usou-se a biblioteca pandas para organizar os dados coletados em um DataFrame, que possibilita a análise de forma estruturada e facilita a exportação para formatos como CSV ou Excel.
+6. Implementação de Delay: Para evitar o bloqueio da aplicação devido a requisições excessivas, foi adicionado um intervalo de 2 segundos entre as requisições utilizando a função `time.sleep(2)`.
+
+------------------------------------------------------------------------
+
+##  Comentários sobre a Qualidade e Características dos Dados Coletados
+
+Os dados coletados incluem informações como descrições de produtos, preços e links para os anúncios no Mercado Livre. A qualidade dos dados depende de vários fatores:
+
+- Descrição do Produto: As descrições podem variar de acordo com o vendedor e a categoria do produto. Isso pode gerar inconsistências nas informações.
+- Preço: O preço é geralmente consistente, mas pode variar devido a promoções ou descontos temporários, o que pode afetar a comparabilidade entre os preços.
+- Link para o Produto: O link fornecido direciona para a página do produto, permitindo uma verificação mais detalhada das informações.
+
+Esses dados são bastante úteis para análise de mercado e comparação de preços, mas devem ser analisados com cautela devido às possíveis variações nas descrições dos produtos.
+
+------------------------------------------------------------------------
+
+##  Possíveis Limitações ou Desafios Enfrentados
+
+Durante o processo de raspagem, alguns desafios e limitações podem ser identificados:
+
+- Mudanças na Estrutura do Site: O Mercado Livre pode alterar sua estrutura HTML, o que pode causar erros no scraping. Essas mudanças exigem ajustes no código.
+- Limitações de Acesso: O site pode bloquear o acesso após várias requisições seguidas, o que pode ser contornado com o uso de proxies ou aumentando o tempo entre as requisições.
+- Qualidade dos Dados: A descrição dos produtos pode ser inconsistente, com variações nas palavras-chave ou erros de digitação, afetando a uniformidade dos dados.
+- Proteção Contra Scraping: O Mercado Livre pode usar métodos para impedir scraping excessivo, como CAPTCHA ou bloqueio de IPs, dificultando a coleta de dados em larga escala.
+
+------------------------------------------------------------------------
+
+##  Aspectos Éticos da Coleta de Dados
+
+A raspagem de dados deve ser realizada de maneira ética para garantir que não haja violação da privacidade dos usuários ou danos à plataforma. Alguns princípios importantes incluem:
+
+- Transparência: Deve-se ser transparente sobre os objetivos da coleta de dados. A coleta deve ser feita de forma que respeite as expectativas dos usuários em relação à privacidade.
+- Respeito ao Trabalho de Outros: O scraping não deve sobrecarregar os servidores do site ou prejudicar a experiência dos usuários. Isso pode ser mitigado ao usar delays nas requisições.
+- Uso Responsável dos Dados: Os dados coletados devem ser utilizados para fins legítimos, como análise de mercado, e não para práticas comerciais desleais ou prejudiciais.
+
+------------------------------------------------------------------------
+
+##  Aspectos Legais da Coleta de Dados
+
+A coleta de dados deve ser feita de acordo com a legislação vigente, especialmente no que diz respeito à LGPD (Lei Geral de Proteção de Dados) e aos Termos de Uso da plataforma. Alguns pontos importantes incluem:
+
+- Termos de Serviço: O Mercado Livre pode ter restrições sobre scraping em seus termos de uso, sendo fundamental verificar essas diretrizes antes de realizar a coleta.
+- Proteção de Dados Pessoais: A coleta de dados deve respeitar a privacidade dos usuários e não violar as leis de proteção de dados pessoais.
+- Propriedade Intelectual: O conteúdo coletado, como descrições e imagens de produtos, pode ser protegido por direitos autorais, e seu uso indevido pode resultar em infrações legais.
+
+------------------------------------------------------------------------
+
+##  Boas Práticas e Recomendações
+
+Para realizar a raspagem de dados de maneira ética e legal, recomenda-se:
+
+- Limitar a Taxa de Requisições: Evitar sobrecarregar o servidor do Mercado Livre implementando atrasos nas requisições.
+- Respeitar o `robots.txt`: Verificar as diretrizes de acesso do site para garantir que a raspagem não viole as regras definidas pela plataforma.
+- Obter Permissão: Quando possível, solicitar permissão explícita para realizar a coleta de dados, especialmente em larga escala.
+
+
+------------------------------------------------------------------------
+
+## Demonstração da análize dos produtos via tabela 
+
+```{python include=FALSE}
+import requests
+from bs4 import BeautifulSoup
+import time
+import pandas as pd
+
+# Definindo user agent
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+}
+
+# Produto fixo: iPhones
+produto = 'iphone'
+produto = produto.replace(' ', '-')
+
+# URL base
+url = f'https://lista.mercadolivre.com.br/{produto}_Desde_'
+
+# Número máximo de páginas
+max_paginas = 2
+
+# Contagem inicial
+start = 1
+pagina_atual = 1
+
+# Lista para armazenar os dados
+dados_coletados = []
+
+# Loop de raspagem
+while pagina_atual <= max_paginas:
+    url_final = url + str(start)
+
+    # Requisição
+    print(f'Requisitando: {url_final}')
+    r = requests.get(url_final, headers=headers)
+
+    # Verifique o status da resposta
+    if r.status_code != 200:
+        print(f"Erro na requisição: {r.status_code}")
+        break
+
+    # Parse HTML
+    site = BeautifulSoup(r.content, 'html.parser')
+
+    # Encontrando resultados
+    descricoes = site.find_all('h2', class_='poly-box poly-component__title')
+    precos = site.find_all('span', class_='andes-money-amount__fraction')
+    links = [h2.find('a')['href'] for h2 in descricoes if h2.find('a')]
+
+    # Verificar se NÃO HÁ MAIS itens
+    if not descricoes:
+        print('Sem mais itens.')
+        break
+
+    # Capturando dados
+    for descricao, preco, link in zip(descricoes, precos, links):
+        dados_coletados.append({
+            'Produto': descricao.get_text(strip=True),
+            'Preço (R$)': preco.get_text(strip=True),
+            'Link': link
+        })
+
+    # Incrementando o índice para a próxima página
+    start += 50
+    pagina_atual += 1
+
+    # Adicionar delay para evitar bloqueio
+    time.sleep(2)
+
+# Criar DataFrame com os dados coletados
+coleta_dados = pd.DataFrame(dados_coletados)
+
+# Exibir a planilha gerada no terminal
+if not coleta_dados.empty:
+    print(coleta_dados)
+else:
+    print("Nenhum dado foi coletado.")
+  
+
+
+
+```
+
+```{python echo=FALSE}
+from tabulate import tabulate
+
+# Limitar a saída a no máximo 20 produtos
+limite = 20
+dados_limitados = coleta_dados.head(limite).copy()  # Use .copy() para evitar o aviso
+
+# Função para truncar texto longo
+def truncar_texto(texto, limite=30):
+    if len(texto) > limite:
+        return texto[:limite - 3] + "..."
+    return texto
+
+# Aplicar truncamento às colunas longas usando loc[]
+dados_limitados.loc[:, "Produto"] = dados_limitados["Produto"].apply(lambda x: truncar_texto(x, limite=20))
+dados_limitados.loc[:, "Link"] = dados_limitados["Link"].apply(lambda x: truncar_texto(x, limite=30))
+
+# Exibir a tabela com estilo limpo
+if not dados_limitados.empty:
+    print(tabulate(dados_limitados, headers='keys', tablefmt='plain'))
+else:
+    print("Nenhum dado foi coletado.")
+
+```
+
+
+
+
+```{python eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Limpar os dados: remover linhas vazias ou mal formatadas
+coleta_dados_limpos = coleta_dados.dropna(subset=['Produto', 'Preço (R$)'])
+
+# Garantir que os preços sejam numéricos
+coleta_dados_limpos['Preço (R$)'] = pd.to_numeric(coleta_dados_limpos['Preço (R$)'], errors='coerce')
+
+# Remover entradas com preços inválidos ou não numéricos
+coleta_dados_limpos = coleta_dados_limpos.dropna(subset=['Preço (R$)'])
+
+# Resetar os índices
+coleta_dados_limpos.reset_index(drop=True, inplace=True)
+# Gráfico 1: Distribuição de Preços (Barra)
+plt.figure(figsize=(12, 8))
+plt.bar(coleta_dados_limpos['Produto'][:10], coleta_dados_limpos['Preço (R$)'][:10], color='skyblue')
+plt.title('Distribuição de Preços dos Produtos (Top 10)', fontsize=16, fontweight='bold')
+plt.xlabel('Produto', fontsize=14)
+plt.ylabel('Preço (R$)', fontsize=14)
+plt.xticks(rotation=45, ha='right', fontsize=12)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# Gráfico 2: Preços Médios, Máximos e Mínimos (Barra)
+df_comparacao = pd.DataFrame({
+    'Estatística': ['Média', 'Máximo', 'Mínimo'],
+    'Preço (R$)': [coleta_dados_limpos['Preço (R$)'].mean(),
+                   coleta_dados_limpos['Preço (R$)'].max(),
+                   coleta_dados_limpos['Preço (R$)'].min()]
+})
+plt.figure(figsize=(8, 6))
+plt.bar(df_comparacao['Estatística'], df_comparacao['Preço (R$)'], color='salmon')
+plt.title('Preços Médios, Máximos e Mínimos', fontsize=16, fontweight='bold')
+plt.xlabel('Estatística', fontsize=14)
+plt.ylabel('Preço (R$)', fontsize=14)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# Gráfico 3: Evolução Acumulada dos Preços dos Produtos (Linha)
+coleta_dados_limpos['Preço Acumulado'] = coleta_dados_limpos['Preço (R$)'].cumsum()
+plt.figure(figsize=(12, 8))
+plt.plot(coleta_dados_limpos['Produto'][:10], coleta_dados_limpos['Preço Acumulado'][:10], 
+         marker='o', linestyle='-', color='green')
+plt.title('Evolução Acumulada dos Preços (Top 10)', fontsize=16, fontweight='bold')
+plt.xlabel('Produto', fontsize=14)
+plt.ylabel('Preço Acumulado (R$)', fontsize=14)
+plt.xticks(rotation=45, ha='right', fontsize=12)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+# Gráfico 4: Diferença de Preço entre Produtos Consecutivos (Linha)
+coleta_dados_limpos['Diferença de Preço'] = coleta_dados_limpos['Preço (R$)'].diff().fillna(0)
+plt.figure(figsize=(12, 8))
+plt.plot(coleta_dados_limpos['Produto'][:10], coleta_dados_limpos['Diferença de Preço'][:10], 
+         marker='o', linestyle='-', color='purple')
+plt.title('Diferença de Preço entre Produtos Consecutivos (Top 10)', fontsize=16, fontweight='bold')
+plt.xlabel('Produto', fontsize=14)
+plt.ylabel('Diferença de Preço (R$)', fontsize=14)
+plt.xticks(rotation=45, ha='right', fontsize=12)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+
+
+```
+
+------------------------------------------------------------------------
+
+## Seção 2: ETL e EDA com o Dataset “State of Data 2023”
+
+O presente trabalho analisa o conjunto de dados "State of Data 2023",
+que apresenta uma visão abrangente do mercado de trabalho na área de
+dados no Brasil. A pesquisa foi conduzida pela Data Hackers, a maior
+comunidade de dados do Brasil, em parceria com a Bain & Company, uma
+consultoria global renomada. Este estudo tem como objetivos principais:
+
+1.  Preparar os dados para análise através de um pipeline de ETL
+    (Extract, Transform, Load).
+2.  Realizar uma Análise Exploratória de Dados (EDA) para identificar
+    padrões, tendências e práticas relevantes no setor de dados.
+
+O resultado esperado é uma síntese detalhada sobre o panorama da área de
+dados no Brasil, servindo como base para tomada de decisão por empresas
+e profissionais.
+
+------------------------------------------------------------------------
+
+## Descrição do Dataset
+
+### Sobre a Pesquisa
+
+-   Fonte: Kaggle - Data Hackers (State of Data Brazil 2023).
+-   Período de Coleta: 16 de outubro a 6 de dezembro de 2023.
+-   Número de Participantes: 5.293 respondentes (aumento de 24% em
+    relação à edição anterior).
+-   Objetivo da Pesquisa:
+    -   Mapear o mercado de trabalho em dados no Brasil.
+    -   Explorar ferramentas utilizadas, práticas adotadas e desafios
+        enfrentados.
+    -   Avaliar o impacto de tecnologias emergentes, como IA Generativa
+        e LLMs.
+
+### Estrutura do Dataset
+
+-   Número de Variáveis: 399 colunas organizadas em 8 categorias
+    principais:
+    1.  Dados Demográficos: Informações como localização, gênero e
+        outros dados de perfil.
+    2.  Dados sobre Carreira: Cargos, salários, níveis de experiência e
+        rotatividade.
+    3.  Desafios dos Gestores: Principais dificuldades enfrentadas no
+        setor.
+    4.  Conhecimentos na Área de Dados: Ferramentas, linguagens de
+        programação e práticas adotadas.
+    5.  Objetivos de Carreira: Metas e aspirações profissionais.
+    6.  Engenharia de Dados (DE): Ferramentas e conhecimentos
+        específicos da área.
+    7.  Análise de Dados (DA): Habilidades relacionadas à visualização e
+        análise de dados.
+    8.  Ciência de Dados (DS): Modelagem, aprendizado de máquina e
+        práticas avançadas.
+-   Formato dos Dados:
+    -   Predominância de variáveis categóricas.
+    -   Algumas perguntas possuem respostas multivaloradas, armazenadas
+        em colunas adicionais com identificação no formato
+        `P<Parte><Pergunta>_<Opção>` (exemplo: `P4_d` representa
+        ferramentas utilizadas no trabalho).
+
+### Processamento e Anonimização
+
+-   Privacidade: Dados sensíveis foram transformados ou excluídos para
+    proteger a identidade dos participantes.
+-   Agrupamentos: Estados com baixa representatividade foram agrupados
+    por região.
+-   Outliers: Dados que poderiam identificar participantes foram
+    tratados ou removidos.
+-   Limitações: A anonimização reduziu a granularidade de alguns dados,
+    como a divisão por estados, que foram agrupados em regiões.
+
+------------------------------------------------------------------------
+
+## Pipeline de ETL
+
+### Extração
+
+-   Fonte: Dataset baixado do Kaggle no formato CSV.
+-   Formato de Codificação: UTF-8 para evitar problemas de caracteres
+    especiais.
+-   Objetivo: Garantir a integridade dos dados para posterior
+    processamento e análise.
+
+------------------------------------------------------------------------
+
+### Transformação
+
+#### Seleção de Colunas Relevantes
+
+As seguintes colunas foram selecionadas por sua relevância para o
+objetivo do trabalho: - Ferramentas Utilizadas: (`P4_d`) Linguagens de
+programação e ferramentas usadas no trabalho. - Áreas de Atuação:
+(`P4_a`, `P4_a_1`) Cargos e atividades desempenhadas. - Fontes de Dados
+Processadas: (`P4_b`) Tipos de fontes analisadas pelos profissionais. -
+Uso de ChatGPT/LLMs: (`P4_m`) Utilização de modelos de linguagem no
+trabalho. - IA Generativa: (`P3_f`) Casos de uso de IA generativa nas
+empresas. - Tamanho das Equipes: (`P3_a`) Número de profissionais de
+dados por empresa. - Papéis no Time de Dados: (`P3_b`) Funções
+desempenhadas nas equipes.
+
+#### Limpeza e Padronização
+
+1.  Nomes de Colunas:
+    -   Remoção de caracteres especiais, como parênteses e aspas.
+    -   Renomeação para termos mais intuitivos, como "Ferramentas" e
+        "Fontes de Dados".
+    -   Exemplo: Antes:
+        `P4_d , Quais das linguagens listadas abaixo você utiliza no trabalho?`.
+        Depois: `"ferramentas"`.
+2.  Tratamento de Valores Ausentes:
+    -   Substituição por `"Não informado"`, garantindo a completude do
+        dataset.
+3.  Separação de Respostas Multivaloradas:
+    -   Divisão de respostas em valores individuais (exemplo:
+        ferramentas separadas por vírgulas).
+4.  Padronização de Textos:
+    -   Conversão de textos para letras minúsculas e remoção de espaços
+        extras.
+
+#### Transformações Adicionais
+
+-   Agrupamento de Categorias:
+    -   Respostas menos frequentes foram agrupadas como `"Outros"` para
+        facilitar a visualização.
+-   Conversão de Tipos de Dados:
+    -   Garantia de que variáveis categóricas e numéricas estivessem
+        corretamente formatadas.
+
+------------------------------------------------------------------------
+
+### Carregamento
+
+-   O dataset transformado foi armazenado em um DataFrame em memória,
+    preparado para a próxima etapa (EDA).
+-   As colunas foram renomeadas para facilitar o entendimento, incluindo
+    nomes como:
+    -   `"ferramentas"`, `"áreas de atuação"`, `"fontes de dados"`,
+        `"chat_llm"`, `"ia generativa"`, `"tamanho da empresa"`.
+
+------------------------------------------------------------------------
+
+## Análise Exploratória de Dados (AED)
+
+A Análise Exploratória de Dados (AED) foi conduzida para compreender as
+características do dataset "State of Data 2023" e identificar padrões
+nas respostas. Essa etapa se concentrou nas variáveis mais relevantes,
+analisando distribuições, frequências e características gerais dos
+dados.
+
+------------------------------------------------------------------------
+
+### Ferramentas Utilizadas
+
+-   Coluna Analisada: `P4_d` (Ferramentas).
+-   Procedimentos:
+    -   Divisão dos valores multivalorados para contabilizar cada
+        ferramenta individualmente.
+    -   Padronização dos nomes para evitar duplicidade (ex.: "Python" e
+        " python").
+    -   Gráfico de barras horizontais exibiu as ferramentas mais
+        mencionadas.
+-   Top 5 Ferramentas Mais Utilizadas:
+    1.  Python
+    2.  SQL
+    3.  Excel
+    4.  Power BI
+    5.  Tableau
+
+------------------------------------------------------------------------
+
+### Fontes de Dados Processadas
+
+-   Coluna Analisada: `P4_b` (Fontes de Dados).
+-   Procedimentos:
+    -   Separação de valores multivalorados.
+    -   Contagem das fontes mais utilizadas e visualização gráfica.
+-   Top 5 Fontes de Dados:
+    1.  Bancos Relacionais (SQL)
+    2.  Planilhas (Excel/Google Sheets)
+    3.  APIs
+    4.  Data Lakes
+    5.  Dados Web (Web Scraping)
+
+------------------------------------------------------------------------
+
+### Uso de ChatGPT e LLMs
+
+-   Coluna Analisada: `P4_m`.
+-   Procedimentos:
+    -   Frequências calculadas para as categorias de resposta ("Sim" e
+        "Não").
+    -   Gráfico de barras apresentou a distribuição.
+-   Distribuição:
+    -   70% dos profissionais utilizam LLMs no trabalho.
+
+------------------------------------------------------------------------
+
+### Áreas de Atuação
+
+-   Colunas Analisadas: `P4_a`, `P4_a_1`.
+-   Procedimentos:
+    -   Análise de frequências por área.
+    -   Gráfico de barras exibiu as distribuições.
+-   Top 3 Áreas de Atuação:
+    1.  Cientista de Dados
+    2.  Engenheiro de Dados
+    3.  Analista de Dados
+
+------------------------------------------------------------------------
+
+### Tamanho das Equipes
+
+-   Coluna Analisada: `P3_a`.
+-   Procedimentos:
+    -   Frequências calculadas para as faixas de tamanho.
+    -   Gráfico de barras categorizou por número de integrantes.
+-   Distribuição:
+    -   Pequenas equipes (\<10 pessoas) predominam.
+
+------------------------------------------------------------------------
+
+### Aplicações de IA Generativa
+
+-   Coluna Analisada: `P3_f`.
+-   Procedimentos:
+    -   Agrupamento das respostas pouco frequentes como "Outros".
+    -   Gráficos de barras separados por categoria.
+-   Principais Aplicações
+    -   Automação de Processos
+    -   Geração de Relatórios
+    -   Geração de Conteúdo
+
+------------------------------------------------------------------------
+
+```{python message=FALSE, warning=FALSE, include=FALSE}
+import pandas as pd
+
+# URL do arquivo CSV no Google Drive
+url = "https://drive.google.com/uc?export=download&id=1Dvlc58A41dAuPK0EiCtvdFYjX3dmkMDT"
+
+try:
+    # Ler o arquivo diretamente
+    df = pd.read_csv(url)
+    print(df.head())
+except Exception as e:
+    print(f"Erro ao carregar o arquivo: {e}")
+
+```
+
+```{python include=FALSE}
+# Selecionando colunas que começam com "P4"
+p4_columns = df.filter(like='P4')
+
+# Exibindo as colunas selecionadas
+p4_columns
+```
+
+```{python include=FALSE}
+# Limpar nomes das colunas para remover caracteres indesejados
+df.columns = (
+    df.columns
+    .str.replace(r"['()]", "", regex=True)  # Remove parênteses e aspas
+    .str.strip()                            # Remove espaços extras
+)
+
+# Verificar os nomes das colunas após limpeza
+print("Nomes das colunas após limpeza:")
+print(df.columns.tolist())
+
+# Selecionar colunas relevantes usando os nomes completos
+colunas = [
+    "P4_d , Quais das linguagens listadas abaixo você utiliza no trabalho?",
+    "P4_a_1 , Atuacao",
+    "P4_b , Quais das fontes de dados listadas você já analisou ou processou no trabalho?",
+    "P4_m , Utiliza ChatGPT ou LLMs no trabalho?",
+    "P4_a , Mesmo que esse não seja seu cargo formal, você considera que sua atuação no dia a dia, reflete alguma das opções listadas abaixo?",
+    "P3_b , Quais desses papéis/cargos fazem parte do time ou chapter de dados da sua empresa?",
+    "P3_a , Qual o número aproximado de pessoas que atuam com dados na sua empresa hoje?",
+    "P3_f , Tipos de uso de AI Generativa e LLMs na empresa"
+
+]
+df_selecionado = df[colunas]
+
+# Renomear colunas para facilitar a análise
+df_selecionado.columns = ["ferramentas", "atuacao", "fontes_de_dado", "chat_llm", "atuacao_reflete", "papeis_time_dados", "tamanho_empresa", "uso_ia_generativa"]
+
+# Exibir as primeiras linhas para verificar
+print("Primeiras linhas do dataframe selecionado:")
+print(df_selecionado.head())
+
+```
+
+```{python message=FALSE, warning=FALSE, include=FALSE}
+# Mostrar quantidade de valores ausentes em cada coluna
+print("Valores ausentes antes do tratamento:")
+print(df_selecionado.isna().sum())
+
+#  Preencher valores ausentes com um valor padrão (exemplo: 'Não informado')
+df_limpo = df_selecionado.fillna("Não informado")
+
+# Exibir a quantidade de valores ausentes após o tratamento
+print("\nValores ausentes após o tratamento:")
+print(df_limpo.isna().sum())
+
+# Exibir as primeiras linhas do dataframe limpo
+#print("\nPrimeiras linhas do dataframe limpo:")
+#print(df_limpo.head())
+
+```
+
+------------------------------------------------------------------------
+
+Gráfico: "Top 10 Ferramentas Utilizadas no Trabalho"
+
+#### Descrição
+
+Este gráfico apresenta as 10 principais ferramentas de tecnologia
+utilizadas pelos profissionais de dados no Brasil, conforme os dados
+coletados na pesquisa State of Data 2023. A análise reflete a frequência
+de menções de cada ferramenta pelos participantes.
+
+-   Eixo X (Frequência): Quantidade de profissionais que mencionaram
+    cada ferramenta.
+-   Eixo Y (Ferramentas): Nomes das ferramentas ou linguagens de
+    programação mais citadas.
+-   Top Ferramentas:
+    1.  SQL: A ferramenta mais mencionada, com 3.156 menções.
+    2.  Python: Segunda mais citada, amplamente usada em análise de
+        dados e machine learning.
+    3.  R: Ferramenta popular entre estatísticos.
+    4.  Outras ferramentas incluem Visual Basic/VBA, JavaScript, e
+        linguagens mais específicas como SAS/Stata e Scala.
+    5.  Um número significativo de participantes respondeu "Não
+        informado" ou "Não utilizo nenhuma das linguagens listadas".
+
+------------------------------------------------------------------------
+
+#### Insight Obtido
+
+1.  SQL como Padrão de Mercado:
+    -   SQL é uma linguagem fundamental para acesso, manipulação e
+        gestão de dados em bancos relacionais. A alta frequência reflete
+        sua relevância transversal, sendo adotada por analistas,
+        engenheiros e cientistas de dados.
+2.  Python na Segunda Posição:
+    -   Python é amplamente utilizado por sua versatilidade e pelas
+        bibliotecas especializadas para análise de dados, aprendizado de
+        máquina e automação de processos.
+3.  Prevalência de R:
+    -   A presença do R destaca seu uso em contextos mais acadêmicos ou
+        em estatísticas avançadas.
+4.  Outras Ferramentas:
+    -   Linguagens como JavaScript e Visual Basic/VBA indicam um uso
+        mais nichado para automação e desenvolvimento de aplicações
+        interativas.
+    -   Ferramentas específicas, como SAS/Stata e Scala, são menos
+        usadas, mas continuam sendo importantes para empresas com
+        necessidades mais específicas.
+
+------------------------------------------------------------------------
+
+#### Importância
+
+1.  Desenvolvimento de Habilidades Prioritárias:
+    -   SQL e Python são as principais ferramentas que profissionais da
+        área de dados devem dominar para atender às demandas do mercado
+        de trabalho.
+    -   Essa priorização ajuda na formação de novos profissionais e na
+        estruturação de cursos de capacitação.
+2.  Adaptação às Necessidades do Mercado:
+    -   A diversidade de ferramentas demonstra que o mercado brasileiro
+        está amadurecendo, com a adoção de soluções específicas para
+        diferentes etapas do ciclo de vida dos dados.
+
+------------------------------------------------------------------------
+
+#### Ensinamentos Práticos
+
+1.  Para Profissionais:
+    -   Focar no aprendizado de SQL e Python como pilares essenciais
+        para entrar ou crescer no mercado de dados.
+    -   Considerar a aprendizagem de ferramentas de nicho (como R,
+        SAS/Stata) para ganhar vantagem em mercados especializados.
+2.  Para Empresas:
+    -   Investir na capacitação de suas equipes em SQL e Python para
+        garantir eficiência nas operações de dados.
+    -   Avaliar o uso de ferramentas mais avançadas (R, Scala) quando
+        houver necessidades específicas de análise ou processamento.
+3.  Para Instituições de Ensino:
+    -   Incorporar o ensino de SQL e Python como componentes essenciais
+        de programas de formação em ciência de dados e tecnologia.
+
+Este gráfico oferece uma visão estratégica sobre as competências mais
+demandadas no setor de dados, ajudando profissionais e empresas a
+alinharem seus objetivos com as exigências do mercado.
+
+```{python, echo=FALSE, message=FALSE, warning=FALSE}
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+from itertools import chain
+from collections import Counter
+
+# Dividir valores na coluna "ferramentas" (supondo que estejam separados por vírgulas)
+df_limpo["ferramentas"] = df_limpo["ferramentas"].str.split(',')
+
+# Expandir os valores em uma lista para contagem
+ferramentas_flat = list(chain(*df_limpo["ferramentas"].dropna().tolist()))
+
+# Contar a frequência de cada ferramenta
+ferramentas_contagem = Counter([f.strip() for f in ferramentas_flat])  # Remover espaços extras
+
+# Converter para um dataframe para visualização
+ferramentas_df = pd.DataFrame.from_dict(ferramentas_contagem, orient='index', columns=['Frequência']).reset_index()
+ferramentas_df.columns = ['Ferramenta', 'Frequência']
+
+# Ordenar pela frequência
+ferramentas_df = ferramentas_df.sort_values(by='Frequência', ascending=False)
+
+# Configurações adicionais para estética
+sns.set_theme(style="whitegrid")
+
+# Gerar o gráfico de barras horizontais
+plt.figure(figsize=(12, 8))
+ax = sns.barplot(
+    data=ferramentas_df.head(10),  # Apenas as 10 ferramentas mais utilizadas
+    y="Ferramenta",
+    x="Frequência",
+    palette="coolwarm"  # Paleta ajustada
+)
+
+# Adicionar rótulos para melhorar a visualização
+ax.bar_label(ax.containers[0], fmt='%d', label_type='edge', padding=5, fontsize=10)
+
+# Ajustar título e rótulos
+plt.title("Top 10 Ferramentas Utilizadas no Trabalho", fontsize=18, fontweight='bold')
+plt.xlabel("Frequência", fontsize=14, labelpad=10)
+plt.ylabel("Ferramentas", fontsize=14, labelpad=10)
+
+# Melhorar espaçamento e adicionar grade horizontal
+plt.tight_layout()
+ax.grid(axis='x', linestyle='--', alpha=0.7)
+
+# Exibir o gráfico
+plt.show()
+
+
+```
+
+------------------------------------------------------------------------
+
+" Gráfico: "Top 10 Fontes de Dados Utilizadas no Trabalho"
+
+#### Descrição
+
+O gráfico apresenta as 10 principais fontes de dados utilizadas pelos
+profissionais de dados no Brasil, conforme identificado na pesquisa
+State of Data 2023.
+
+-   Eixo X (Frequência): Número de vezes que cada fonte foi mencionada.
+-   Eixo Y (Fontes de Dados): Categorias das fontes de dados mais
+    utilizadas.
+-   Top Fontes de Dados:
+    1.  Planilhas (3.429 menções): Amplamente usadas, principalmente em
+        análises básicas.
+    2.  Dados relacionais (bancos SQL): Utilizados para armazenamento e
+        análise de dados estruturados.
+    3.  Textos/Documentos: Dados não estruturados em grande destaque.
+    4.  Bancos NoSQL: Para armazenamento de dados não estruturados e
+        escaláveis.
+    5.  Dados georreferenciados: Utilizados em análises espaciais.
+    6.  Outras fontes incluem imagens, áudios, vídeos, e APIs.
+
+------------------------------------------------------------------------
+
+#### Insight Obtido
+
+1.  Domínio de Planilhas e Bancos Relacionais:
+    -   Planilhas permanecem como a principal ferramenta para análises
+        rápidas e simples, especialmente em pequenas empresas ou
+        equipes.
+    -   Bancos SQL são indispensáveis para análises mais estruturadas e
+        complexas, indicando sua ampla aceitação no mercado.
+2.  Crescimento do Uso de Dados Não Estruturados:
+    -   A presença significativa de textos/documentos e dados
+        georreferenciados evidencia a expansão de aplicações para dados
+        mais diversificados.
+    -   Bancos NoSQL ganham espaço em ambientes com necessidade de
+        escalabilidade e flexibilidade.
+3.  Uso de APIs e Mídia:
+    -   O uso de APIs para extração de dados externos reflete a
+        crescente interconexão entre sistemas.
+    -   Fontes como imagens, áudios e vídeos indicam a adoção de
+        tecnologias de IA para análise multimodal.
+
+------------------------------------------------------------------------
+
+#### Importância
+
+1.  Adaptação às Necessidades do Mercado:
+    -   O domínio de dados relacionais e não relacionais é essencial
+        para atender às demandas atuais do mercado.
+    -   Empresas devem equilibrar o uso de fontes estruturadas (SQL) e
+        não estruturadas (NoSQL, APIs, textos).
+2.  Diferenciação Competitiva:
+    -   Profissionais que conseguem trabalhar com dados não estruturados
+        (textos, imagens, vídeos) estão mais preparados para lidar com
+        aplicações modernas, como IA e big data.
+
+------------------------------------------------------------------------
+
+#### Ensinamentos Práticos
+
+1.  Para Profissionais:
+    -   Fortalecer habilidades em planilhas e bancos relacionais (SQL).
+    -   Expandir conhecimento em fontes não estruturadas (textos, bancos
+        NoSQL) para atender à crescente demanda por análise avançada.
+2.  Para Empresas:
+    -   Priorizar a modernização da infraestrutura de dados,
+        incorporando bancos NoSQL e APIs para maior flexibilidade e
+        escalabilidade.
+    -   Investir em ferramentas para análise de dados não estruturados,
+        como sistemas de processamento de linguagem natural (NLP) ou
+        análise de imagens.
+3.  Para Instituições de Ensino:
+    -   Reforçar a base em bancos SQL enquanto introduz fundamentos de
+        bancos NoSQL e fontes de dados multimodais, preparando os alunos
+        para desafios atuais e futuros.
+
+------------------------------------------------------------------------
+
+Este gráfico destaca a importância de dominar fontes estruturadas e a
+transição para a análise de dados não estruturados, refletindo a
+evolução das necessidades de mercado e tecnologia.
+
+```{python, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+# Dividir valores na coluna "fontes_de_dado" (supondo que estejam separados por vírgulas)
+df_selecionado["fontes_de_dado"] = df_selecionado["fontes_de_dado"].str.split(',')
+
+# Expandir os valores em uma lista para contagem
+fontes_flat = list(chain(*df_selecionado["fontes_de_dado"].dropna().tolist()))
+
+# Contar a frequência de cada fonte de dados
+fontes_contagem = Counter([f.strip() for f in fontes_flat])
+
+# Converter para um dataframe para visualização
+fontes_df = pd.DataFrame.from_dict(fontes_contagem, orient='index', columns=['Frequência']).reset_index()
+fontes_df.columns = ['Fonte de Dados', 'Frequência']
+
+# Ordenar pela frequência
+fontes_df = fontes_df.sort_values(by='Frequência', ascending=False)
+
+# Configurar o estilo do Seaborn
+sns.set_theme(style="whitegrid")
+
+# Gerar o gráfico de barras horizontais
+plt.figure(figsize=(12, 8))
+ax = sns.barplot(
+    data=fontes_df.head(10),  # Apenas as 10 fontes de dados mais utilizadas
+    y="Fonte de Dados",
+    x="Frequência",
+    palette="coolwarm"  # Paleta ajustada para melhor contraste
+)
+
+# Adicionar rótulos para as barras
+ax.bar_label(ax.containers[0], fmt='%d', label_type='edge', padding=5, fontsize=10)
+
+# Ajustar título e rótulos
+plt.title("Top 10 Fontes de Dados Utilizadas no Trabalho", fontsize=18, fontweight='bold')
+plt.xlabel("Frequência", fontsize=14, labelpad=10)
+plt.ylabel("Fontes de Dados", fontsize=14, labelpad=10)
+
+# Melhorar espaçamento e adicionar grade horizontal
+plt.tight_layout()
+ax.grid(axis='x', linestyle='--', alpha=0.7)
+
+# Exibir o gráfico
+plt.show()
+
+
+
+```
+
+------------------------------------------------------------------------
+
+Gráfico: "Uso de ChatGPT/LLMs no Trabalho"
+
+#### Descrição
+
+O gráfico apresenta a frequência de respostas relacionadas ao uso de
+ChatGPT/LLMs (Large Language Models) no ambiente de trabalho, conforme
+identificado na pesquisa State of Data 2023. Cada barra representa uma
+categoria de uso ou não uso das ferramentas de IA generativa.
+
+-   Eixo X (Frequência): Número de vezes que cada categoria foi
+    mencionada pelos participantes.
+-   Eixo Y (Uso de ChatGPT/LLMs): Descrição do tipo de uso ou da
+    ausência de uso de ferramentas de IA generativa.
+
+------------------------------------------------------------------------
+
+#### Categorias Principais
+
+1.  Utilizo apenas soluções gratuitas (como ChatGPT free):
+    -   Representa a maior frequência (2.219 menções).
+    -   Profissionais que adotam versões gratuitas para tarefas diárias.
+2.  Não utilizo nenhum tipo de solução de IA Generativa:
+    -   A segunda maior categoria, com participantes que não empregam IA
+        generativa em suas atividades.
+3.  Utilizo soluções no estilo "Copilot" (ex.: GitHub Copilot, ChatGPT
+    Plus):
+    -   Usadas para maior produtividade em desenvolvimento e automação.
+4.  Utilizo soluções pagas de IA Generativa:
+    -   Inclui modelos avançados como ChatGPT Plus e MidJourney, com
+        pagamento pelo próprio profissional ou pela empresa.
+
+------------------------------------------------------------------------
+
+#### Insight Obtido
+
+1.  Alta Adoção de Ferramentas Gratuitas:
+    -   A predominância de soluções gratuitas reflete o impacto
+        democratizante de ferramentas como ChatGPT, permitindo acesso a
+        IA generativa mesmo em empresas de pequeno porte ou para
+        profissionais autônomos.
+2.  Barreira para Soluções Pagas:
+    -   Apesar de amplamente reconhecidas, soluções pagas ainda possuem
+        menor adoção, seja por questões financeiras ou por não serem
+        vistas como indispensáveis.
+3.  Significativo Número de Não Usuários:
+    -   A presença de muitos profissionais que não utilizam IA
+        generativa indica que há barreiras culturais, técnicas ou de
+        infraestrutura que limitam a adoção.
+4.  Crescimento de Soluções Estilo "Copilot":
+    -   Ferramentas como GitHub Copilot mostram o interesse crescente em
+        soluções que integram IA generativa diretamente em fluxos de
+        trabalho específicos.
+
+------------------------------------------------------------------------
+
+#### Importância
+
+1.  Evolução Tecnológica no Trabalho:
+    -   A adoção crescente de IA generativa aponta para uma mudança
+        significativa na forma como tarefas analíticas e criativas são
+        realizadas.
+2.  Acessibilidade como Diferencial:
+    -   Soluções gratuitas têm um papel crucial na popularização da IA
+        generativa, nivelando o campo de atuação entre empresas de
+        diferentes tamanhos.
+3.  Necessidade de Treinamento:
+    -   Profissionais precisam ser capacitados para explorar melhor as
+        vantagens dessas ferramentas, especialmente para tirar maior
+        proveito de soluções pagas e avançadas.
+
+------------------------------------------------------------------------
+
+#### Ensinamentos Práticos
+
+1.  Para Profissionais:
+    -   Familiarizar-se com ferramentas gratuitas como ChatGPT e avaliar
+        o impacto delas em produtividade e eficiência.
+    -   Experimentar soluções pagas para entender os benefícios
+        adicionais em projetos mais complexos.
+2.  Para Empresas:
+    -   Investir em treinamento para aumentar a adoção de ferramentas de
+        IA generativa e fomentar a cultura de inovação.
+    -   Avaliar o custo-benefício de soluções pagas, como o GitHub
+        Copilot, para tarefas específicas.
+3.  Para Instituições de Ensino:
+    -   Incluir o uso de ferramentas como ChatGPT nos currículos,
+        capacitando novos profissionais para o mercado em transformação.
+
+------------------------------------------------------------------------
+
+Este gráfico evidencia a democratização da IA generativa e os desafios
+de adoção em diferentes contextos, destacando o papel das ferramentas
+gratuitas e as oportunidades de expansão com soluções mais avançadas.
+
+```{python, echo=FALSE, message=FALSE, warning=FALSE}
+# Importar as bibliotecas necessárias
+
+
+# Configurações adicionais para estética
+sns.set_theme(style="whitegrid")
+
+# Contar a frequência de cada resposta na coluna "chat_llm"
+chat_llm_contagem = df_selecionado["chat_llm"].value_counts().reset_index()
+chat_llm_contagem.columns = ['Uso de ChatGPT/LLMs', 'Frequência']
+
+# Gerar o gráfico de barras
+plt.figure(figsize=(12, 8))  # Ajustando o tamanho do gráfico para 16x9
+ax = sns.barplot(
+    data=chat_llm_contagem,
+    y="Uso de ChatGPT/LLMs",
+    x="Frequência",
+    palette="coolwarm"  # Paleta ajustada para maior impacto visual
+)
+
+# Adicionar rótulos para melhorar a visualização
+ax.bar_label(ax.containers[0], fmt='%d', label_type='edge', padding=5, fontsize=10)
+
+# Ajustar título e rótulos
+plt.title("Frequência do Uso de ChatGPT/LLMs no Trabalho", fontsize=18, fontweight='bold')
+plt.xlabel("Frequência", fontsize=14, labelpad=10)
+plt.ylabel("Uso de ChatGPT/LLMs", fontsize=14, labelpad=10)
+
+# Melhorar espaçamento e adicionar grade horizontal
+plt.tight_layout()
+ax.grid(axis='x', linestyle='--', alpha=0.7)
+
+# Exibir o gráfico
+plt.show()
+
+
+```
+
+------------------------------------------------------------------------
+
+Gráfico: "Distribuição de Áreas de Atuação"
+
+#### Descrição
+
+Este gráfico de barras apresenta a distribuição das áreas de atuação dos
+participantes da pesquisa State of Data 2023. Cada barra representa uma
+categoria de atuação no mercado de dados, acompanhada da respectiva
+frequência de profissionais.
+
+-   Eixo X (Frequência): Número de profissionais que atuam em cada área
+    específica.
+-   Eixo Y (Área de Atuação): Principais categorias de atuação no setor
+    de dados.
+
+------------------------------------------------------------------------
+
+#### Categorias Principais
+
+1.  Análise de Dados:
+    -   Área mais representativa, com 1.795 respondentes.
+    -   Inclui atividades de coleta, análise e visualização de dados
+        para apoio na tomada de decisão.
+2.  Engenharia de Dados:
+    -   Com grande representatividade, envolve a construção e manutenção
+        de pipelines e infraestruturas de dados.
+3.  Gestores:
+    -   Envolve liderança e estratégia para equipes de dados, com
+        significativa presença.
+4.  Ciência de Dados:
+    -   Profissionais focados em modelagem preditiva, aprendizado de
+        máquina e análises avançadas.
+5.  Outras Atividades e Buscando Oportunidade:
+    -   Inclui profissionais que não se encaixam nas categorias acima ou
+        estão em transição de carreira.
+
+------------------------------------------------------------------------
+
+#### Insight Obtido
+
+1.  Análise de Dados como Ponto de Entrada:
+    -   A predominância da análise de dados destaca essa área como a
+        mais acessível para iniciantes e essencial para empresas que
+        estão estruturando times de dados.
+2.  Demanda Crescente por Engenharia de Dados:
+    -   A alta frequência de engenheiros de dados reflete a crescente
+        demanda por infraestrutura robusta para lidar com volumes
+        maiores e mais complexos de dados.
+3.  Presença Significativa de Gestores:
+    -   A representatividade de gestores sugere que as empresas estão
+        amadurecendo na organização de suas equipes de dados, criando
+        lideranças dedicadas.
+4.  Ciência de Dados em Crescimento:
+    -   Apesar de ser uma área avançada, a ciência de dados mostra boa
+        representatividade, indicando que as empresas estão investindo
+        em modelos preditivos e inteligência artificial.
+5.  Transição e Busca por Oportunidades:
+    -   A presença de respondentes buscando oportunidades reforça a
+        atratividade da área de dados e a necessidade de capacitação
+        contínua.
+
+------------------------------------------------------------------------
+
+#### Importância
+
+1.  Para Profissionais:
+    -   Identificar áreas com maior representatividade pode ajudar na
+        escolha de uma trajetória de carreira.
+    -   Reconhecer a importância da análise de dados como porta de
+        entrada e da engenharia de dados para a sustentação de projetos
+        maiores.
+2.  Para Empresas:
+    -   Investir em equipes multidisciplinares que combinem analistas,
+        engenheiros e cientistas de dados para alcançar uma estratégia
+        de dados completa.
+    -   Desenvolver lideranças para gerenciar times em crescimento e
+        garantir alinhamento com os objetivos estratégicos.
+3.  Para Instituições de Ensino e Formação:
+    -   Focar em programas que atendam às demandas de habilidades em
+        análise e engenharia de dados.
+    -   Criar currículos que reflitam a relevância dessas áreas no
+        mercado.
+
+------------------------------------------------------------------------
+
+#### Ensinamentos Práticos
+
+1.  Iniciantes devem começar por análise de dados, uma área fundamental
+    e de fácil entrada no mercado.
+2.  Empresas em expansão precisam priorizar a contratação de engenheiros
+    de dados para garantir a escalabilidade e a integridade dos
+    sistemas.
+3.  Equipes de dados devem ter gestores experientes para assegurar a
+    integração entre áreas e maximizar o retorno dos investimentos em
+    dados.
+4.  Profissionais em transição devem buscar capacitação em análise ou
+    engenharia de dados, áreas com maior demanda e que oferecem amplo
+    espaço para crescimento.
+
+Este gráfico reflete um mercado robusto e em expansão, destacando tanto
+áreas maduras quanto oportunidades de entrada para novos profissionais.
+
+```{python, echo=FALSE, message=FALSE, warning=FALSE}
+# Contar a frequência de cada resposta na coluna "atuacao"
+atuacao_contagem = df_selecionado["atuacao"].value_counts().reset_index()
+atuacao_contagem.columns = ['Área de Atuação', 'Frequência']
+
+# Configurar o estilo do Seaborn
+sns.set_theme(style="whitegrid")
+
+# Gerar o gráfico de barras
+plt.figure(figsize=(12, 8))
+ax = sns.barplot(
+    data=atuacao_contagem,
+    y="Área de Atuação",
+    x="Frequência",
+    palette="coolwarm"  # Paleta ajustada para contraste e impacto
+)
+
+# Adicionar rótulos para as barras
+ax.bar_label(ax.containers[0], fmt='%d', label_type='edge', padding=5, fontsize=10)
+
+# Ajustar título e rótulos
+plt.title("Distribuição de Áreas de Atuação", fontsize=18, fontweight='bold')
+plt.xlabel("Frequência", fontsize=14, labelpad=10)
+plt.ylabel("Área de Atuação", fontsize=14, labelpad=10)
+
+# Melhorar espaçamento e adicionar grade horizontal
+plt.tight_layout()
+ax.grid(axis='x', linestyle='--', alpha=0.7)
+
+# Exibir o gráfico
+plt.show()
+
+```
+
+------------------------------------------------------------------------
+
+Gráfico: "Distribuição de Atuação Refletida no Dia a Dia"
+
+#### Descrição
+
+O gráfico acima representa a distribuição das áreas de atuação que os
+profissionais identificaram como refletidas em suas atividades do dia a
+dia. Ele foi gerado a partir das respostas à pesquisa State of Data
+2023. Cada barra mostra uma categoria de atuação e a frequência com que
+ela foi mencionada.
+
+-   Eixo X (Frequência): Quantidade de participantes que escolheram cada
+    tipo de atuação.
+-   Eixo Y (Atuação Refletida no Dia a Dia): As categorias de atuação
+    reconhecidas pelos profissionais como representativas de seu
+    trabalho diário.
+
+------------------------------------------------------------------------
+
+#### Categorias Representadas
+
+1.  Análise de Dados/BI:
+    -   Atividade mais mencionada, com 1.795 ocorrências.
+    -   Envolve cruzamento de dados, identificação de padrões, geração
+        de insights e criação de dashboards e relatórios para suporte à
+        tomada de decisão.
+2.  Engenharia de Dados:
+    -   Representa papéis técnicos ligados ao design de arquitetura de
+        dados, desenvolvimento de pipelines, e implementação de soluções
+        como data lakes e data warehouses.
+3.  Ciência de Dados/Machine Learning/AI:
+    -   Profissionais que aplicam modelos preditivos e algoritmos para
+        resolver problemas do negócio e otimizar processos.
+4.  Nenhuma das Frentes Citadas:
+    -   Pequeno grupo que não se identifica com as categorias
+        principais, indicando funções menos tradicionais ou
+        generalistas.
+
+------------------------------------------------------------------------
+
+#### Insights Obtidos
+
+1.  Predominância de Análise de Dados:
+    -   A análise de dados é a atividade mais refletida no dia a dia dos
+        profissionais, reforçando sua importância como base para a
+        tomada de decisões nas empresas.
+2.  Demanda Técnica por Engenharia de Dados:
+    -   A significativa presença de engenheiros de dados destaca a
+        necessidade de infraestruturas robustas e escaláveis para
+        suportar operações analíticas e científicas.
+3.  Crescimento de Ciência de Dados e AI:
+    -   Apesar de menor em relação às outras áreas, o número de
+        profissionais trabalhando com ciência de dados e AI sugere que
+        as empresas estão adotando modelos avançados para otimizar suas
+        operações.
+4.  Especialização do Mercado:
+    -   A segmentação entre essas áreas demonstra que o mercado de dados
+        está se estruturando em funções específicas, indicando maior
+        maturidade no setor.
+
+------------------------------------------------------------------------
+
+#### Importância
+
+1.  Para Profissionais:
+    -   Entender as principais frentes de atuação ajuda na escolha e no
+        direcionamento de carreira.
+    -   A análise de dados pode ser uma entrada natural para o mercado,
+        enquanto engenharia e ciência de dados requerem maior
+        especialização técnica.
+2.  Para Empresas:
+    -   A alocação adequada de recursos em análise, engenharia e ciência
+        de dados é essencial para obter insights estratégicos e escalar
+        operações.
+    -   A presença de diferentes frentes reflete a necessidade de
+        equipes multidisciplinares para cobrir toda a jornada de dados.
+3.  Para Instituições de Ensino:
+    -   Cursos devem priorizar habilidades em análise e engenharia de
+        dados, alinhando-se às demandas mais frequentes do mercado.
+    -   Programas avançados podem incluir ciência de dados e
+        inteligência artificial para profissionais mais experientes.
+
+------------------------------------------------------------------------
+
+#### Ensinamentos Práticos
+
+1.  Análise de Dados como Base:
+    -   A maioria dos profissionais reflete essa atividade em seu dia a
+        dia, destacando sua importância como base de qualquer estratégia
+        de dados.
+2.  Engenharia e Ciência de Dados como Diferenciais:
+    -   Enquanto a análise é predominante, as áreas de engenharia e
+        ciência de dados são diferenciais para empresas e profissionais
+        buscando excelência técnica.
+3.  Foco no Desenvolvimento de Carreira:
+    -   Profissionais podem começar em análise de dados e se
+        especializar posteriormente em engenharia ou ciência de dados,
+        dependendo de suas metas e habilidades.
+
+O gráfico evidencia a diversidade e segmentação das frentes de atuação
+no mercado de dados, oferecendo insights valiosos para planejamento de
+carreira, estruturação de equipes e capacitação profissional.
+
+```{python, echo=FALSE, message=FALSE, warning=FALSE}
+# Contar a frequência de cada resposta na coluna "atuacao"
+atuacao_contagem = df_selecionado["atuacao"].value_counts().reset_index()
+atuacao_contagem.columns = ['Área de Atuação', 'Frequência']
+
+# Configurar o estilo do Seaborn
+sns.set_theme(style="whitegrid")
+
+# Gerar o gráfico de barras
+plt.figure(figsize=(12, 8))  # Aumentar o tamanho da figura para melhor visualização
+ax = sns.barplot(
+    data=atuacao_contagem,
+    y="Área de Atuação",
+    x="Frequência",
+    palette="coolwarm"  # Cores ajustadas para impacto visual
+)
+
+# Adicionar rótulos para as barras
+ax.bar_label(ax.containers[0], fmt='%d', label_type='edge', padding=5, fontsize=10)
+
+# Ajustar título e rótulos
+plt.title("Distribuição de Áreas de Atuação", fontsize=18, fontweight='bold')
+plt.xlabel("Frequência", fontsize=14, labelpad=10)
+plt.ylabel("Área de Atuação", fontsize=14, labelpad=10)
+
+# Melhorar espaçamento e adicionar grade horizontal
+plt.tight_layout()
+ax.grid(axis='x', linestyle='--', alpha=0.7)
+
+# Exibir o gráfico
+plt.show()
+```
+
+------------------------------------------------------------------------
+
+Gráfico: "Distribuição do Tamanho da Empresa"
+
+#### Descrição
+
+O gráfico acima representa a distribuição das empresas participantes da
+pesquisa State of Data 2023, categorizadas de acordo com o tamanho de
+suas equipes de dados. Ele foi gerado com base na frequência de
+respostas dos profissionais, que indicaram o número de pessoas atuando
+diretamente com dados em suas organizações.
+
+-   Eixo X (Frequência): Quantidade de empresas em cada categoria.
+-   Eixo Y (Tamanho da Empresa): Faixas de tamanho baseadas no número de
+    profissionais atuando na área de dados.
+
+------------------------------------------------------------------------
+
+#### Categorias Representadas
+
+1.  Acima de 300 pessoas:
+    -   Representa grandes empresas, indicando organizações com alto
+        grau de maturidade em dados.
+2.  1 - 3 pessoas:
+    -   Pequenos times ou empresas iniciando esforços relacionados à
+        área de dados.
+3.  4 - 10 pessoas:
+    -   Times intermediários, geralmente encontrados em empresas de
+        médio porte.
+4.  11 - 20, 21 - 50 pessoas:
+    -   Times em expansão, frequentemente alinhados a empresas em
+        crescimento.
+5.  101 - 300, 51 - 100 pessoas:
+    -   Times robustos, indicativos de empresas estruturadas ou grandes
+        corporações.
+6.  Sem equipe de dados:
+    -   Empresas que ainda não possuem profissionais dedicados à área de
+        dados.
+
+------------------------------------------------------------------------
+
+#### Insights Obtidos
+
+1.  Predominância de Equipes Pequenas:
+    -   A maioria das empresas possui equipes pequenas, especialmente
+        entre 1 a 10 profissionais, sugerindo que muitas empresas ainda
+        estão no estágio inicial de desenvolvimento da área de dados.
+2.  Presença de Grandes Times:
+    -   O número significativo de empresas com mais de 300 pessoas em
+        suas equipes indica que grandes corporações já possuem alta
+        maturidade na área de dados.
+3.  Ausência de Profissionais em Algumas Empresas:
+    -   A presença de empresas que ainda não possuem equipes de dados
+        reflete que o mercado ainda tem espaço para adoção inicial de
+        práticas de análise e engenharia de dados.
+4.  Segmentação do Mercado:
+    -   O mercado é diversificado, com uma ampla distribuição entre
+        pequenas, médias e grandes equipes, indicando diferentes níveis
+        de maturidade e demanda por profissionais da área.
+
+------------------------------------------------------------------------
+
+#### Importância
+
+1.  Para Profissionais:
+    -   Profissionais podem identificar oportunidades tanto em empresas
+        grandes com equipes maduras quanto em empresas menores que estão
+        começando na área de dados, apresentando grande potencial de
+        crescimento.
+2.  Para Empresas:
+    -   Empresas podem usar essa informação para benchmarking, avaliando
+        o tamanho de suas equipes em relação à média do mercado.
+    -   Organizações com equipes pequenas podem considerar a expansão
+        para acompanhar as tendências do setor.
+3.  Para o Mercado:
+    -   O gráfico evidencia a necessidade de formação e capacitação de
+        mais profissionais para atender à demanda crescente,
+        principalmente em pequenas e médias empresas.
+
+------------------------------------------------------------------------
+
+#### Ensinamentos Práticos
+
+1.  Oportunidade de Crescimento para Profissionais:
+    -   Equipes pequenas sugerem que há espaço para os profissionais se
+        destacarem e liderarem iniciativas de dados.
+2.  Demanda por Profissionais de Dados em Expansão:
+    -   Empresas de médio porte, que estão ampliando suas equipes,
+        precisam de profissionais experientes para estruturar a área.
+3.  Desafios em Grandes Corporações:
+    -   Empresas com grandes equipes de dados necessitam de
+        profissionais altamente especializados para lidar com
+        infraestruturas complexas e projetos avançados.
+
+Este gráfico reforça a importância de adaptar estratégias de contratação
+e treinamento de acordo com o estágio de maturidade da empresa na área
+de dados. Ele também demonstra que o mercado de dados no Brasil está em
+franca expansão e diversificação.
+
+```{python, echo=FALSE, message=FALSE, warning=FALSE}
+# Contar a frequência de cada tamanho de empresa
+tamanho_empresa_contagem = df_selecionado["tamanho_empresa"].value_counts().reset_index()
+tamanho_empresa_contagem.columns = ['Tamanho da Empresa', 'Frequência']
+
+# Configurar o estilo do Seaborn
+sns.set_theme(style="whitegrid")
+
+# Gerar o gráfico de barras
+plt.figure(figsize=(12, 8))  # Dimensão ajustada para maior clareza
+ax = sns.barplot(
+    data=tamanho_empresa_contagem,
+    y="Tamanho da Empresa",
+    x="Frequência",
+    palette="coolwarm"  # Paleta de cores ajustada
+)
+
+# Adicionar rótulos para as barras
+ax.bar_label(ax.containers[0], fmt='%d', label_type='edge', padding=5, fontsize=10)
+
+# Ajustar título e rótulos
+plt.title("Distribuição do Tamanho da Empresa", fontsize=18, fontweight='bold')
+plt.xlabel("Frequência", fontsize=14, labelpad=10)
+plt.ylabel("Tamanho da Empresa", fontsize=14, labelpad=10)
+
+# Melhorar espaçamento e adicionar grade horizontal
+plt.tight_layout()
+ax.grid(axis='x', linestyle='--', alpha=0.7)
+
+# Exibir o gráfico
+plt.show()
+
+```
+
+------------------------------------------------------------------------
+
+Gráficos: Relação entre Papéis em Times de Dados e o Tamanho da Empresa
+
+#### Descrição dos Gráficos
+
+Os gráficos apresentados ilustram a distribuição de diferentes papéis
+desempenhados em times de dados de empresas de variados tamanhos. Cada
+gráfico corresponde a um papel específico, incluindo: 1. Engenheiro de
+Dados 2. Cientista de Dados 3. Analista de Dados 4. Analista de Business
+Intelligence (BI) 5. Não Informado (papéis não especificados)
+
+O eixo horizontal representa as faixas de tamanho das empresas, enquanto
+o eixo vertical apresenta a frequência de empresas com profissionais
+desempenhando esses papéis.
+
+------------------------------------------------------------------------
+
+#### Insights Obtidos
+
+1.  Engenheiro de Dados:
+    -   Concentração de engenheiros de dados em empresas com mais de 300
+        funcionários.
+    -   Empresas menores (1-10 pessoas) apresentam menor número de
+        engenheiros, sugerindo que essa função é mais crítica em
+        corporações de grande porte, com infraestrutura de dados
+        complexa.
+2.  Cientista de Dados:
+    -   Semelhante aos engenheiros, cientistas de dados estão amplamente
+        presentes em empresas grandes (acima de 300 funcionários).
+    -   O papel também é encontrado em empresas médias (101-300
+        pessoas), indicando a relevância da modelagem e análise avançada
+        para empresas com recursos intermediários.
+3.  Analista de Dados:
+    -   Uma das funções mais amplamente distribuídas, presente em
+        empresas de todos os tamanhos.
+    -   Destaque para empresas grandes, mas uma distribuição mais
+        uniforme sugere que essa função é essencial independentemente do
+        porte da organização.
+4.  Analista de BI:
+    -   Amplamente presente em empresas maiores, mas também com boa
+        representação em empresas médias e pequenas (11-50
+        funcionários).
+    -   Indica que a visualização e interpretação de dados são
+        necessidades universais para suporte estratégico.
+5.  Papéis Não Informados:
+    -   A frequência elevada no grupo "Não Informado" reflete a falta de
+        clareza na definição de papéis em muitas empresas, sugerindo
+        oportunidade para melhor categorização e alinhamento.
+
+------------------------------------------------------------------------
+
+#### Importância e Ensinamentos
+
+1.  Evolução dos Times de Dados:
+    -   Empresas maiores investem em times diversificados, incluindo
+        papéis especializados como Engenheiro e Cientista de Dados,
+        enquanto empresas menores priorizam funções generalistas como
+        Analistas de Dados.
+2.  Adaptação ao Contexto Organizacional:
+    -   Empresas com equipes menores tendem a priorizar profissionais
+        com habilidades amplas, enquanto organizações maiores alocam
+        especialistas para lidar com problemas específicos.
+3.  Potencial de Estruturação:
+    -   A alta frequência de "Não Informado" aponta para a necessidade
+        de padronizar descrições de cargos, o que pode beneficiar tanto
+        empregadores quanto profissionais no alinhamento de expectativas
+        e na definição de carreiras.
+
+------------------------------------------------------------------------
+
+#### Aplicabilidade Prática
+
+-   Empresas de Pequeno Porte: Devem considerar o treinamento de
+    analistas para lidar com demandas múltiplas em ambientes de recursos
+    limitados.
+-   Empresas de Grande Porte: Indicativo de que investimentos em
+    especialistas, como engenheiros de dados, são cruciais para lidar
+    com arquiteturas complexas e grandes volumes de dados.
+-   Mercado de Trabalho: Profissionais devem alinhar suas
+    especializações às demandas organizacionais baseadas no porte das
+    empresas em que desejam atuar.
+
+```{python, echo=FALSE, message=FALSE, warning=FALSE}
+import seaborn as sns
+import matplotlib.pyplot as plt
+from itertools import chain
+import pandas as pd
+
+# Dividir os valores na coluna "papeis_time_dados" em listas separadas
+df_limpo["papeis_time_dados"] = df_limpo["papeis_time_dados"].str.split(',')
+
+# Expandir os valores para contagem
+papeis_flat = list(chain(*df_limpo["papeis_time_dados"].dropna().tolist()))
+
+# Criar uma nova DataFrame com o tamanho da empresa e papéis
+tamanho_empresa = df_limpo["tamanho_empresa"].repeat(df_limpo["papeis_time_dados"].dropna().apply(len))
+papeis_repetidos = list(chain(*df_limpo["papeis_time_dados"].dropna()))
+
+# Criar um novo DataFrame
+df_relacao = pd.DataFrame({
+    "Tamanho Empresa": tamanho_empresa.values,
+    "Papeis Time Dados": papeis_repetidos
+})
+
+# Criar gráficos separados para os 5 papéis mais comuns
+top_papeis = pd.Series(papeis_flat).value_counts().head(5).index
+
+for papel in top_papeis:
+    plt.figure(figsize=(12, 8))  # Ajustar o tamanho da figura
+    sns.countplot(
+        data=df_relacao[df_relacao["Papeis Time Dados"] == papel],
+        x="Tamanho Empresa",
+        palette="coolwarm"  # Alterar paleta para cores mais impactantes
+    )
+    plt.title(f"Distribuição do Papel '{papel}' por Tamanho da Empresa", fontsize=16, fontweight='bold')
+    plt.xlabel("Tamanho da Empresa", fontsize=14, labelpad=10)
+    plt.ylabel("Frequência", fontsize=14, labelpad=10)
+    plt.xticks(rotation=45, fontsize=12)  # Rotação ajustada para legibilidade
+    plt.yticks(fontsize=12)
+    plt.tight_layout()
+    plt.grid(axis='y', linestyle='--', alpha=0.7)  # Adicionar grade horizontal
+    plt.show()
+```
+
+------------------------------------------------------------------------
+
+Gráfico: Uso de IA Generativa por Tamanho da Empresa
+
+#### Descrição do Gráfico
+
+Este conjunto de gráficos apresenta a distribuição do uso de ferramentas
+de IA generativa (como ChatGPT e LLMs) em diferentes tamanhos de
+empresas, categorizadas por faixas numéricas de colaboradores. Cada
+gráfico detalha um cenário específico de utilização, como uso
+independente, direcionamento centralizado ou exploração por equipes
+internas.
+
+#### Insights Obtidos
+
+1.  Distribuição do Uso Independente:
+    -   Empresas com equipes menores (1-3 colaboradores) lideram no uso
+        independente de IA generativa, com o objetivo de aumentar a
+        produtividade.
+    -   Isso pode ser atribuído à flexibilidade e à necessidade de
+        otimizar recursos em equipes menores.
+2.  Direcionamento Centralizado:
+    -   Empresas maiores (acima de 300 colaboradores) destacam-se na
+        implementação de IA generativa com direcionamento centralizado e
+        apoio financeiro.
+    -   Este comportamento reflete uma maior maturidade e investimento
+        em soluções tecnológicas.
+3.  Indefinição no Uso de IA Generativa:
+    -   Em empresas menores (1-3 colaboradores), há um maior índice de
+        respostas "Não sei opinar", indicando uma possível falta de
+        clareza ou conhecimento sobre as iniciativas de IA.
+4.  Exploração Inicial:
+    -   Empresas de médio porte (11-50 colaboradores) frequentemente
+        utilizam IA generativa em fases experimentais, visando tanto
+        eficiência operacional quanto diferenciação de produtos.
+
+#### Importância dos Resultados
+
+-   O uso de IA generativa varia significativamente com o tamanho da
+    empresa, refletindo recursos e prioridades estratégicas diferentes.
+-   Empresas pequenas tendem a explorar IA de forma mais independente,
+    enquanto empresas maiores adotam uma abordagem estruturada e
+    centralizada.
+-   Estes padrões são indicativos do estágio de maturidade tecnológica e
+    da capacidade de investimento de cada segmento.
+
+#### Ensino e Aplicações
+
+-   Para Empresas:
+    -   Empresas menores podem se inspirar nas estratégias centralizadas
+        de empresas maiores para maximizar o impacto da IA generativa.
+    -   Empresas médias podem priorizar iniciativas experimentais para
+        identificar rapidamente aplicações com alto ROI.
+-   Para Profissionais de Dados:
+    -   Compreender os padrões de uso de IA generativa ajuda a
+        identificar oportunidades de mercado.
+    -   Profissionais podem focar em criar soluções customizadas para
+        empresas menores e em integrar tecnologias em ambientes mais
+        complexos de empresas grandes.
+-   Para Pesquisadores e Estudantes:
+    -   Este estudo reforça a necessidade de adaptar ferramentas e
+        práticas ao contexto organizacional.
+    -   A análise comparativa entre tamanhos de empresas serve como base
+        para futuras pesquisas sobre adoção tecnológica.
+
+Esses gráficos destacam como diferentes tamanhos de empresas lidam com a
+inovação tecnológica, fornecendo um panorama útil para decisões
+estratégicas e estudos de mercado.
+
+```{python, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Criando a tabela de frequência para o uso de IA generativa
+uso_ia_resumo = df_limpo.groupby(['tamanho_empresa', 'uso_ia_generativa']).size().reset_index(name='Frequência')
+
+# Agrupando categorias menos frequentes em 'Outros'
+limite_outros = 5  # Define um limite para 'outros'
+uso_ia_resumo['uso_ia_generativa'] = uso_ia_resumo.apply(
+    lambda row: 'Outros' if row['Frequência'] < limite_outros else row['uso_ia_generativa'],
+    axis=1
+)
+
+# Agrupando novamente após categorizar como 'Outros' para somar as frequências
+uso_ia_resumo = uso_ia_resumo.groupby(['tamanho_empresa', 'uso_ia_generativa'])['Frequência'].sum().reset_index()
+
+# Criar gráficos separados para cada categoria de IA generativa
+for categoria in uso_ia_resumo['uso_ia_generativa'].unique():
+    subset = uso_ia_resumo[uso_ia_resumo['uso_ia_generativa'] == categoria]
+
+    plt.figure(figsize=(12, 8))  # Aumentar a dimensão do gráfico
+    sns.barplot(
+        data=subset,
+        x='tamanho_empresa',
+        y='Frequência',
+        palette='coolwarm'  # Paleta de cores ajustada
+    )
+    plt.title(f"Uso de IA Generativa: {categoria}", fontsize=18, fontweight='bold')
+    plt.xlabel("Tamanho da Empresa", fontsize=14, labelpad=10)
+    plt.ylabel("Frequência", fontsize=14, labelpad=10)
+    plt.xticks(rotation=45, fontsize=12)  # Rotação ajustada para legibilidade
+    plt.yticks(fontsize=12)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)  # Adicionar grade horizontal
+    plt.tight_layout()
+    plt.show()
+
+```
+
+------------------------------------------------------------------------
+
+## Conclusão
+
+O trabalho realizado abordou duas frentes principais de análise:
+
+### Web Scraping
+
+Foi implementado um script de scraping para o site Mercado Livre, com
+foco na coleta de dados relacionados a produtos da linha iPhone.
+Utilizando ferramentas como Python, Requests e BeautifulSoup, foram
+extraídos nome do produto, preço e link para compra. A análise foi
+limitada a 10 páginas, enfrentando desafios como duplicatas, preços
+incompletos e bloqueios pelo site. Os dados coletados foram apresentados
+em gráficos que permitiram interpretar a distribuição e comparação de
+preços, oferecendo uma visão clara do mercado analisado.
+
+### ETL e Análise Exploratória de Dados (EDA)
+
+Com o dataset "State of Data 2023", obtido da Data Hackers em parceria
+com a Bain & Company, foi implementado um pipeline de ETL para
+transformar os dados e garantir sua integridade. A Análise Exploratória
+de Dados (EDA) destacou ferramentas mais utilizadas no mercado, fontes
+de dados preferenciais, aplicação de IA generativa e áreas de atuação
+dos profissionais. Esses insights forneceram uma visão abrangente sobre
+o mercado de dados no Brasil.
+
+### Considerações Finais
+
+O trabalho demonstrou domínio técnico em ferramentas de manipulação e
+análise de dados, bem como capacidade de extrair insights práticos. Na
+parte de web scraping, foram identificadas limitações e sugeridas
+melhorias para futuras implementações. A análise do dataset "State of
+Data 2023" trouxe insights valiosos sobre o mercado de dados, sendo útil
+para profissionais, empresas e instituições de ensino. Este projeto
+reflete o uso estratégico de ciência de dados para resolver problemas
+reais e agregar valor a partir de dados disponíveis.
+
+## Bibliografia
+
+1.  Mercado Livre. Disponível em: <https://www.mercadolivre.com.br>.
+    Acesso em: [data de acesso].
+2.  Data Hackers, Bain & Company. "State of Data 2023". Pesquisa
+    conduzida entre outubro e dezembro de 2023. Disponível em:
+    <https://www.kaggle.com>.
+3.  Hunter, J.D. "Matplotlib: A 2D Graphics Environment." *Computing in
+    Science & Engineering*, vol. 9, no. 3, 2007, pp. 90–95. DOI:
+    10.1109/MCSE.2007.55.
+4.  Pedregosa, F. et al. "Scikit-learn: Machine Learning in Python."
+    *Journal of Machine Learning Research*, vol. 12, 2011, pp.
+    2825–2830.
+5.  Richardson, L. "Beautiful Soup Documentation." Disponível em:
+    <https://www.crummy.com/software/BeautifulSoup/>. Acesso em: [data
+    de acesso].
